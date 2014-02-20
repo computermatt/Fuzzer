@@ -36,6 +36,17 @@ def search(root):
 
 
 '''
+@param  | (string)        |  root - the url to be searched
+        |                 | 
+@return | (array[string]) |  pages found
+'''
+def guess(visited, wordList):
+    
+    
+    return 0
+
+
+'''
 @param  | (array[string]), string  | visited - list of urls, string - desired file name
         |                          | 
 @return | nothing                  |  
