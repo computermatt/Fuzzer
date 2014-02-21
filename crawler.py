@@ -36,15 +36,22 @@ def search(root):
 
 
 '''
-@param  | (string)        |  root - the url to be searched
-        |                 | 
-@return | (array[string]) |  pages found
+@param  | (array[string]), (string)  |  urls - array of urls, wordList - txt file of common words
+        |                            | 
+@return | (array[string])            |  pages found
 '''
-def guess(visited, wordList):
+def guess(urls, wordList, extList):
+    visited = []
     
-    
-    return 0
-
+    for i in wordList:
+        for j in extList:
+            temp = urls[0] + i + j
+            try:
+                urllib.request.urlopen(temp)
+                visited.append(temp)
+            except:
+                print( temp + " doesn't exist")
+    return visited
 
 '''
 @param  | (array[string]), string  | visited - list of urls, string - desired file name
@@ -55,5 +62,3 @@ def output(visited,name):
     file = open(name,'w')
     for i in visited:
         file.write(i + ", ")
-    
-
