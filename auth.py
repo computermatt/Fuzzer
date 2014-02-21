@@ -6,5 +6,7 @@ Created on Feb 19, 2014
 import requests
 from requests.auth import HTTPBasicAuth
 
-a = requests.get('https://www.github.com/user', auth=HTTPBasicAuth('user', 'pass'))
-print(a)
+class Auth:
+
+    def authenticate(self, address, user, password):
+        a = requests.get(address, auth=HTTPBasicAuth(user, password))
