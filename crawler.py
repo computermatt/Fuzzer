@@ -36,9 +36,9 @@ def search(root):
 
 
 '''
-@param  | (array[string]), (string)  |  urls - array of urls, wordList - txt file of common words
-        |                            | 
-@return | (array[string])            |  pages found
+@param  | (array[string]), (array[string]), (array[string])  |  urls - array of urls, wordList - array of common words, extlist - list of common extensions
+        |                                                    | 
+@return | (array[string])                                    |  pages found
 '''
 def guess(urls, wordList, extList):
     visited = []
