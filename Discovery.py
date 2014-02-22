@@ -6,9 +6,11 @@ Created on Feb 19, 2014
 import urllib.request
 import urllib.parse
 from bs4 import *
-
+import requests
 
 class Discovery:
+    def __init__(self, session):
+        self.session = session
 
     '''
     @param  | (string)        |  root - the url to be searched
@@ -18,21 +20,21 @@ class Discovery:
     def search(self,root):
         urls = [root]
         visited = []
-        
+        cache = {}        
         while len(urls) > 0:
             try:
-                html = urllib.request.urlopen(urls[0])
+                html = self.session.get(urls[0]).text
             except:
                 print("Error accessing " + urls[0])
             soup = BeautifulSoup(html)
+            cache[urls[0]] = soup
             urls.pop(0)
-            print(len(urls))
             for i in soup.findAll('a', href = True):
                 i["href"] = urllib.parse.urljoin(root, i["href"])
                 if i["href"] not in visited and root in i["href"]:
                     urls.append(i["href"])
                     visited.append(i["href"])
-        return visited
+        return visited,cache
     
     
     '''
@@ -40,17 +42,15 @@ class Discovery:
             |                                                    | 
     @return | (array[string])                                    |  pages found
     '''
-    def guess(self, urls, wordList, extList):
+    def guess(self, url, wordList, extList):
         visited = []
         
         for i in wordList:
             for j in extList:
-                temp = urls[0] + i + j
-                try:
-                    urllib.request.urlopen(temp)
+                temp = url + i + j
+                val = self.session.get(temp)
+                if val.status_code != 404:
                     visited.append(temp)
-                except:
-                    print( temp + " doesn't exist")
         return visited
     
     '''

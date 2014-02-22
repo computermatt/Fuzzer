@@ -2,10 +2,13 @@
 
 import argparse
 import sys
+import Input, auth, Discovery
+import requests
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument("mode", nargs="?", help="Discover: Output a comprehensive, human-readable list of all discovered inputs to the system.  Techniques include both crawling and guessing. Test: Discover all inputs, then attempt a list of exploit vectors on those inputs. Report potential vulnerabilities.")
+	parser.add_argument("url", nargs="?", help="URL to fuzz.")
 	parser.add_argument("--custom-auth", dest="cust_auth", help="Signal that the fuzzer should use hard-coded authentication for a specific application (e.g. dvwa). Optional.")	
 	parser.add_argument("--common-words", dest="common_words", help="Newline-delimited file of common words to be used in page guessing and input guessing. Required (for discover).")
 	parser.add_argument("--vectors", dest="vectors", help="Newline-delimited file of common exploits to vulnerabilities. Required (for test).")
@@ -14,5 +17,39 @@ if __name__ == '__main__':
 	parser.add_argument("--slow", dest="slow", help='Number of milliseconds considered when a response is considered "slow". Default is 500 milliseconds', default="500")
 
 	args = parser.parse_args()
-	print(args)
+	args = vars(args)
+	if args["mode"] == "discover":
+		if not args["common_words"]:
+			print("Missing common words list\n\n")
+			parser.print_help()
+			sys.exit()
+		if not args["url"]:
+			print("Missing URL\n\n")
+			parser.print_help()
+			sys.exit()
 
+		auth = auth.Auth()
+		url = args["url"] + "login.php" #this assumes trailing slash
+		session = auth.authenticate(url, "admin", "password")
+		#for url in foundURLs:
+		discover = Discovery.Discovery(session)
+		foundURLs = discover.search(args["url"])
+		print("Discovered pages:")
+		print("\tIn URL: " + url + "\n\tFound: " + ", ".join(foundURLs[0]))
+
+		extList = [".html", ".php", ".jsp", ""]
+		fileList = open(args["common_words"]).read().splitlines()
+		guessedURLs = discover.guess(args["url"], fileList, extList)
+		print("\n\tThe following interesting urls point to pages: " + ", ".join(guessedURLs))
+		discoveredInputs = {}
+		input = Input.Input()
+		for url in foundURLs[0]:
+			discoveredInputs[url] = input.parseURL(url) + input.discoverForms(foundURLs[1][url])
+		print("Discovered inputs:")
+		for k in discoveredInputs.keys():
+			if len(discoveredInputs[k]) != 0:
+				print("\t\t" + k + ": " + ", ".join(discoveredInputs[k]))
+		print("Cookies: " + str([(x.name, x.value) for x in input.discoverCookies(session)]))
+	else:
+		print("Only discover mode is active\n\n")
+		parser.print_help()
