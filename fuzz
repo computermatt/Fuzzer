@@ -18,7 +18,18 @@ if __name__ == '__main__':
 
 	args = parser.parse_args()
 	args = vars(args)
-	if args["mode"] == "discover":
+	if args["mode"] == "test":
+		if not args["vectors"]:
+			print("Missing vectors list\n\n")
+			parser.print_help()
+			sys.exit()
+		if not args["sensitive"]:
+			print("Missing sensitive data list\n\n")
+			parser.print_help()
+			sys.exit()
+
+
+	elif args["mode"] == "discover":
 		if not args["common_words"]:
 			print("Missing common words list\n\n")
 			parser.print_help()
@@ -28,28 +39,39 @@ if __name__ == '__main__':
 			parser.print_help()
 			sys.exit()
 
-		auth = auth.Auth()
-		url = args["url"] + "login.php" #this assumes trailing slash
-		session = auth.authenticate(url, "admin", "password")
-		#for url in foundURLs:
-		discover = Discovery.Discovery(session)
-		foundURLs = discover.search(args["url"])
+	else:
+		parser.print_help()
+		sys.exit()
+
+
+	auth = auth.Auth()
+	url = args["url"] + "login.php" #this assumes trailing slash
+	session = auth.authenticate(url, "admin", "password")
+	discover = Discovery.Discovery(session)
+	foundURLs = discover.search(args["url"])
+	
+
+	extList = [".html", ".php", ".jsp", ""]
+	fileList = open(args["common_words"]).read().splitlines()
+	guessedURLs = discover.guess(args["url"], fileList, extList)
+
+
+	discoveredInputs = {}
+	input = Input.Input()
+	for url in foundURLs[0]:
+		discoveredInputs[url] = input.parseURL(url) + input.discoverForms(foundURLs[1][url])
+
+	if args["mode"] == "discover":
 		print("Discovered pages:")
 		print("\tIn URL: " + url + "\n\tFound: " + ", ".join(foundURLs[0]))
 
-		extList = [".html", ".php", ".jsp", ""]
-		fileList = open(args["common_words"]).read().splitlines()
-		guessedURLs = discover.guess(args["url"], fileList, extList)
 		print("\n\tThe following interesting urls point to pages: " + ", ".join(guessedURLs))
-		discoveredInputs = {}
-		input = Input.Input()
-		for url in foundURLs[0]:
-			discoveredInputs[url] = input.parseURL(url) + input.discoverForms(foundURLs[1][url])
+
 		print("Discovered inputs:")
 		for k in discoveredInputs.keys():
 			if len(discoveredInputs[k]) != 0:
 				print("\t\t" + k + ": " + ", ".join(discoveredInputs[k]))
 		print("Cookies: " + str([(x.name, x.value) for x in input.discoverCookies(session)]))
-	else:
-		print("Only discover mode is active\n\n")
-		parser.print_help()
+	else: #we can assume test because we do the check above for the type
+		#test here
+		pass
