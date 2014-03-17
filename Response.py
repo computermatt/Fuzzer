@@ -8,18 +8,22 @@ Created on Mar 16, 2014
 @author: Dan
 '''
     
-def checkCode( url):
-    r = requests.get('https://www.facebook.com').status_code
+def checkCode(request):
+    r = request.status_code
     return r
 
-def checkDelay( url):
-    r = requests.get('https://www.facebook.com').elapsed
+def checkDelay(request):
+    r = request.elapsed
     return r
 
-def checkTestData( url):
+def checkTestData(request):
     pass
 
-def checkSanatization( url):
+def checkSanatization(request):
     pass
 
-print(checkDelay("https://www.facebook.com"))
+a = requests.get("https://www.facebook.com")
+print("Response Delay:  ") 
+print(checkDelay(a))
+print("Response Code:  ") 
+print(checkCode(a))
