@@ -2,27 +2,37 @@ import urllib.request
 import urllib.parse
 from bs4 import *
 import requests
+import datetime
 '''
 Created on Mar 16, 2014
 
 @author: Dan
 '''
-class Response:
-    
-    def __init__(self, url):
-        self.request = requests.get(url)
 
+#a = Response(requests.get("http://127.0.0.1/dvwa/vulnerabilities/sqli/"))
+
+
+def test(response):
+    
+#check delay
+    expectedTime = datetime.timedelta(seconds=1)
+    if response.elapsed > expectedTime:
+        print("response to " + response.url + " took longer than expected")
         
-    def checkCode(self):
-        return self.request.status_code
+#Check response code
+    if response.status_code != 200:
+        print("response from" + response.url + " is " + response.checkCode())
+        
+#Check for test data
+    source = response.text
+    #compare text to vectors
+    #return warning if anything in vectors detected
     
-    def checkDelay(self):
-        return self.request.elapsed
+#Check for sanatization of input
+    source2 = response.text
     
-    def checkTestData(self):
-        pass
     
-    def checkSanatization(self):
-        pass
-    
-a = Response("https://www.facebook.com")
+
+
+
+
