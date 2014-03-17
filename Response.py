@@ -7,23 +7,22 @@ Created on Mar 16, 2014
 
 @author: Dan
 '''
+class Response:
     
-def checkCode(request):
-    r = request.status_code
-    return r
+    def __init__(self, url):
+        self.request = requests.get(url)
 
-def checkDelay(request):
-    r = request.elapsed
-    return r
-
-def checkTestData(request):
-    pass
-
-def checkSanatization(request):
-    pass
-
-a = requests.get("https://www.facebook.com")
-print("Response Delay:  ") 
-print(checkDelay(a))
-print("Response Code:  ") 
-print(checkCode(a))
+        
+    def checkCode(self):
+        return self.request.status_code
+    
+    def checkDelay(self):
+        return self.request.elapsed
+    
+    def checkTestData(self):
+        pass
+    
+    def checkSanatization(self):
+        pass
+    
+a = Response("https://www.facebook.com")
