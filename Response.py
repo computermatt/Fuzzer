@@ -62,7 +62,8 @@ def getResults(urlList, responseTime, testList, username, password):
         b = test.responseTest(response)
         c = test.dataTest(response, testList)
         d = test.dataTest(response)
-        resultsForPage = response.url + "\n" + a + "\n" + b + "\n" + c + "\n" + d + "\n"
+        resultString = response.url + "\n" + a + "\n" + b + "\n" + c + "\n" + d + "\n"
+        results.append(resultString)
     return results
 
 
