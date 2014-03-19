@@ -88,7 +88,7 @@ print(e)
 '''
 
 '''
-list1 = ["http://127.0.0.1/dvwa/index.php","http://127.0.0.1/dvwa/vulnerabilities/sqli/"]
+list1 = ["http://127.0.0.1/dvwa/login.php","http://127.0.0.1/dvwa/index.php","http://127.0.0.1/dvwa/vulnerabilities/sqli/"]
 a = getResults(list1,0.001,"testdata.txt","admin","password")
 for i in a:
     print(i)
