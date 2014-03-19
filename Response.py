@@ -21,6 +21,8 @@ class Test:
         if response.status_code != 200:
             rs = "response from" + response.url + " is " + response.checkCode()
             return rs
+        else:
+            return ""
             
             
     def dataTest(self, response, file):
@@ -33,7 +35,8 @@ class Test:
             j = source.find(i)
             #return warning if anything in vectors detected
             if j >= 0:
-                warnings.append(vectors[i] + " found in " + response.url)
+
+                warnings.append("Vector " +i + " found in " + response.url)
         for j in warnings:
             rs = rs + j + "\n"       
         return rs
@@ -63,6 +66,10 @@ class Test:
 
 
 """
+Returns an array of results. one element per url.
+Each element contains the url and the warnings associated with it.
+
+
 """
 def getResults(urlList, formList, responseTime, testList, username, password, vectorFile):    
     session = Auth.authenticate(urlList[0], username, password)
@@ -82,5 +89,15 @@ def getResults(urlList, formList, responseTime, testList, username, password, ve
             results.append(resultString)
     return results
 
-
+#Testing Stuff
+'''
+a = Auth.authenticate("a","http://127.0.0.1/dvwa/login.php", "admin", "password")
+b = a.get("http://127.0.0.1/dvwa/index.php")
+c = Test.dataTest("a", b, "testdata.txt")
+d = Test.delayTest("a", b, 0.0001)
+e = Test.responseTest("a",b)
+print(c)
+print(d)
+print(e)
+'''
 
