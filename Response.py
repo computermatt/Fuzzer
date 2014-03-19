@@ -57,7 +57,7 @@ class Test:
 Returns an array of results. one element per url.
 Each element contains the url and the warnings associated with it.
 
-
+urllist[0] MUST BE THE AUTHENTICATION URL
 """
 def getResults(urlList, responseTime, testList, username, password):    
     session = Auth.authenticate("q",urlList[0], username, password)
