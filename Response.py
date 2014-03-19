@@ -37,7 +37,7 @@ class Test:
             #return warning if anything in vectors detected
             if j >= 0:
 
-                warnings.append("Vector " +i + " found in " + url)
+                warnings.append("\tVector " +i + " found in " + url)
         for j in warnings:
             rs = rs + j + "\n"       
         return rs
@@ -47,25 +47,26 @@ class Test:
         source = response.text
         potential = ["<",">",",",".",'"',"'","(",")","="] #This list doesn't have everything in it, but it should have enough to be able to say if an XSS attack is possible
         content = BeautifulSoup(source)
-        for form in content.find_all("form"):
+        for form in content.find_all("pre"):
             if any(word in source for word in potential):
                 return "Potential XSS attack in " + url
         return "" 
 
     def vectorTest(self, url, session, form, vectorList, responseTime, testList):
+        vectorList = [line.strip() for line in open(vectorList)]
         results = []
         for i in form:
-            if (i != "submit") or (i != "Login"): 
+            if (i != "submit") and (i != "Login") and (i != ""): 
                 for v in vectorList:
                     payload = {i:v}
                     response = session.post(url, data=payload) 
                     a = self.delayTest(response, responseTime, url)
                     b = self.responseTest(response, url)
-                    c = self.dataTest(response, testList, url)
                     d = self.sanTest(response, url)
-                    resultString = "For URL: " + url + " , " + a + " , " + b + " , " + c + " , " + d + " , " + "for input: " + i + "\n"
-                    results.append(resultString)
-        return "\n".join(results)
+                    if a and b and d:
+                        resultString = "For URL: " + url + "\n\t" + a + "\n\t" + b + "\n\t" + d + "\n"
+                        results.append(resultString)
+        return "\n\n".join(results)
 
 
 """
@@ -81,7 +82,6 @@ def getResults(urlList,inputs, responseTime, testList, username, password,vector
     results = []
     counter = 0
     for i in urlList:
-        print("Checking: " + i)
         response = session.get(urlList[counter])
         test = Test(response)
         a = test.delayTest(response, responseTime, i)
@@ -91,7 +91,7 @@ def getResults(urlList,inputs, responseTime, testList, username, password,vector
             d = test.vectorTest(i, session, inputs[i], vectors, responseTime, testList)
         else:
             d = ""
-        resultString = i + "\n" + a + "\n" + b + "\n" + c + "\n" + d + "\n"
+        resultString = i + "\n\t" + a + "\n\t" + b + "\n" + c + "\n\t" + d + "\n"
         results.append(resultString)
         counter = counter + 1
     return results
