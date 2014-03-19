@@ -28,7 +28,7 @@ class Input:
 		return retVal
 
 	'''
-		Same as parseURL, but with additional "output" key with the value of the url the form is sent to as well as the type of request (post, get, etc.)
+		Same as parseURL
 	'''
 	def discoverForms(self, soup):
 		inputs = [] 

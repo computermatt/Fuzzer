@@ -23,10 +23,12 @@ if __name__ == '__main__':
 			print("Missing vectors list\n\n")
 			parser.print_help()
 			sys.exit()
+		vectorFile = args["vectors"]
 		if not args["sensitive"]:
 			print("Missing sensitive data list\n\n")
 			parser.print_help()
 			sys.exit()
+		testList = args["sensitive"]
 
 
 	elif args["mode"] == "discover":
@@ -73,5 +75,4 @@ if __name__ == '__main__':
 				print("\t\t" + k + ": " + ", ".join(discoveredInputs[k]))
 		print("Cookies: " + str([(x.name, x.value) for x in input.discoverCookies(session)]))
 	else: #we can assume test because we do the check above for the type
-		#test here
-		pass
+		r = Response.getResults(foundURLs[0], discoveredInputs, 0.1, testList, "admin", "password", vectorFile)
