@@ -60,6 +60,7 @@ class Test:
                 for v in vectorList:
                     payload = {i:v}
                     response = session.post(url, data=payload) 
+                    print(response.text)
                     a = self.delayTest(response, responseTime, url)
                     b = self.responseTest(response, url)
                     d = self.sanTest(response, url)
@@ -75,14 +76,10 @@ Each element contains the url and the warnings associated with it.
 
 urllist[0] MUST BE THE AUTHENTICATION URL
 """
-def getResults(urlList,inputs, responseTime, testList, username, password,vectors):    
-    if "login.php" not in urlList[0]:
-        urlList[0] = urlList[0] + "login.php"
-    session = Auth.authenticate("q",urlList[0], username, password)
+def getResults(session,urlList,inputs, responseTime, testList, username, password,vectors):    
     results = []
-    counter = 0
-    for i in urlList:
-        response = session.get(urlList[counter])
+    for i in urlList[1:]:
+        response = session.get(i)
         test = Test(response)
         a = test.delayTest(response, responseTime, i)
         b = test.responseTest(response, i)
@@ -93,7 +90,6 @@ def getResults(urlList,inputs, responseTime, testList, username, password,vector
             d = ""
         resultString = i + "\n\t" + a + "\n\t" + b + "\n" + c + "\n\t" + d + "\n"
         results.append(resultString)
-        counter = counter + 1
     return results
 
 #Testing Stuff
