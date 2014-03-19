@@ -60,17 +60,19 @@ Each element contains the url and the warnings associated with it.
 
 """
 def getResults(urlList, responseTime, testList, username, password):    
-    session = Auth.authenticate(urlList[0], username, password)
+    session = Auth.authenticate("q",urlList[0], username, password)
     results = []
+    counter = 0
     for i in urlList:
-        response = session.get(urlList[i])
-        test = Test(session.get(response))
+        response = session.get(urlList[counter])
+        test = Test(response)
         a = test.delayTest(response, responseTime)
         b = test.responseTest(response)
         c = test.dataTest(response, testList)
         d = test.sanTest(response)
         resultString = response.url + "\n" + a + "\n" + b + "\n" + c + "\n" + d + "\n"
         results.append(resultString)
+        counter = counter + 1
     return results
 
 #Testing Stuff
@@ -85,3 +87,9 @@ print(d)
 print(e)
 '''
 
+'''
+list1 = ["http://127.0.0.1/dvwa/index.php","http://127.0.0.1/dvwa/vulnerabilities/sqli/"]
+a = getResults(list1,0.001,"testdata.txt","admin","password")
+for i in a:
+    print(i)
+'''
