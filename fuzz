@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-import Input, auth, Discovery
+import Input, auth, Discovery, Response
 import requests
 
 if __name__ == '__main__':
@@ -76,3 +76,5 @@ if __name__ == '__main__':
 		print("Cookies: " + str([(x.name, x.value) for x in input.discoverCookies(session)]))
 	else: #we can assume test because we do the check above for the type
 		r = Response.getResults(foundURLs[0], discoveredInputs, 0.1, testList, "admin", "password", vectorFile)
+		for i in r:
+			print(i)

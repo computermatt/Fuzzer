@@ -10,22 +10,23 @@ class Test:
     def __init__(self, response):
         self.response = response
     
-    def delayTest(self, response, rTime):
+    def delayTest(self, response, rTime, url):
         expectedTime = datetime.timedelta(seconds=rTime)
         if response.elapsed > expectedTime:
-            rs = "response to " + response.url + " took longer than expected"
+            rs = "response to " + url + " took longer than expected"
             return rs
+        return ""
             
             
-    def responseTest(self, response):
+    def responseTest(self, response, url):
         if response.status_code != 200:
-            rs = "response from" + response.url + " is " + response.checkCode()
+            rs = "response from " + url + " is " + str(response.status_code)
             return rs
         else:
             return ""
             
             
-    def dataTest(self, response, file):
+    def dataTest(self, response, file, url):
         vectors = [line.strip() for line in open(file)]
         source = response.text
         warnings = []
@@ -36,33 +37,35 @@ class Test:
             #return warning if anything in vectors detected
             if j >= 0:
 
-                warnings.append("Vector " +i + " found in " + response.url)
+                warnings.append("Vector " +i + " found in " + url)
         for j in warnings:
             rs = rs + j + "\n"       
         return rs
         
         
-    def sanTest(self, response):
+    def sanTest(self, response, url):
         source = response.text
         potential = ["<",">",",",".",'"',"'","(",")","="] #This list doesn't have everything in it, but it should have enough to be able to say if an XSS attack is possible
-	if any(word in source for word in potential):
-		return "Potential XSS attack in " + response.url 
-	return False
+        content = BeautifulSoup(source)
+        for form in content.find_all("form"):
+            if any(word in source for word in potential):
+                return "Potential XSS attack in " + url
+        return "" 
 
     def vectorTest(self, url, session, form, vectorList, responseTime, testList):
         results = []
         for i in form:
-            if i != "submit": #submit is a button, you can't exploit a button!
+            if (i != "submit") or (i != "Login"): 
                 for v in vectorList:
                     payload = {i:v}
                     response = session.post(url, data=payload) 
-                    a = delayTest(response, responseTime)
-                    b = responseTest(response)
-                    c = dataTest(response, testList)
-                    d = test.sanTest(response)
-                    resultString = response.url + "\n" + a + "\n" + b + "\n" + c + "\n" + d + "\n"
+                    a = self.delayTest(response, responseTime, url)
+                    b = self.responseTest(response, url)
+                    c = self.dataTest(response, testList, url)
+                    d = self.sanTest(response, url)
+                    resultString = "For URL: " + url + " , " + a + " , " + b + " , " + c + " , " + d + " , " + "for input: " + i + "\n"
                     results.append(resultString)
-        return results
+        return "\n".join(results)
 
 
 """
@@ -71,22 +74,26 @@ Each element contains the url and the warnings associated with it.
 
 
 """
-def getResults(urlList, formList, responseTime, testList, username, password, vectorFile):    
-    session = Auth.authenticate(urlList[0], username, password)
+def getResults(urlList,inputs, responseTime, testList, username, password,vectors):    
+    if "login.php" not in urlList[0]:
+        urlList[0] = urlList[0] + "login.php"
+    session = Auth.authenticate("q",urlList[0], username, password)
     results = []
-    vectorList = [line.strip() for line in open(vectorFile)]
+    counter = 0
     for i in urlList:
-        if i in formList.keys():
-            results.append(test.vectorTest(response, formList[i], vectorList))
-        else:   
-            response = session.get(urlList[i])
-            test = Test(session.get(response))
-            a = test.delayTest(response, responseTime)
-            b = test.responseTest(response)
-            c = test.dataTest(response, testList)
-            d = test.sanTest(response)
-            resultString = response.url + "\n" + a + "\n" + b + "\n" + c + "\n" + d + "\n"
-            results.append(resultString)
+        print("Checking: " + i)
+        response = session.get(urlList[counter])
+        test = Test(response)
+        a = test.delayTest(response, responseTime, i)
+        b = test.responseTest(response, i)
+        c = test.dataTest(response, testList, i)
+        if i in inputs.keys():
+            d = test.vectorTest(i, session, inputs[i], vectors, responseTime, testList)
+        else:
+            d = ""
+        resultString = i + "\n" + a + "\n" + b + "\n" + c + "\n" + d + "\n"
+        results.append(resultString)
+        counter = counter + 1
     return results
 
 #Testing Stuff
@@ -101,3 +108,9 @@ print(d)
 print(e)
 '''
 
+'''
+list1 = ["http://127.0.0.1/dvwa/login.php","http://127.0.0.1/dvwa/index.php","http://127.0.0.1/dvwa/vulnerabilities/sqli/"]
+a = getResults(list1,0.001,"testdata.txt","admin","password")
+for i in a:
+    print(i)
+'''
